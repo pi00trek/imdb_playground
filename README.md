@@ -1,0 +1,1 @@
+A webapp displaying some info about people from movie industry scraped from imdb.

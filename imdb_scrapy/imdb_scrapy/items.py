@@ -12,3 +12,11 @@ class ImdbScrapyItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
+
+class Movies(scrapy.Item):
+    title = scrapy.Field()
+    link = scrapy.Field()
+    year = scrapy.Field()
+    extra_info = scrapy.Field()
+    genre = scrapy.Field()

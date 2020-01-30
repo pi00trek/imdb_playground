@@ -32,32 +32,32 @@ class Imdb(scrapy.Spider):
         # response.css('div[id*="director"] a::text').getall()
 
         directed_movies = []
-# def aa():
-#     url = 'https://www.imdb.com/name/nm0000631/?ref_=fn_al_nm_1'
+        # def aa():
+        #     url = 'https://www.imdb.com/name/nm0000631/?ref_=fn_al_nm_1'
 
         role = 'director'
         resp = response.css(f'div[id*="{role}"]')
-for item in resp:
-    # print(item)
-    # print('-----------')
-    title = item.css('a::text').get()
-    if title.lower() == role:
-        pass
-    else:
-        l = ItemLoader(item=Movies(), selector=item, response=response)
-        l.add_css('title', 'a::text')
-        l.add_css('link', 'a::attr(href)')
-        l.add_css('year', 'span.year_column::text')
-        # l.add_css('title', 'a::text')
-        # l.add_css('title', 'a::text')
-        l.load_item()
-        print('-------')
-        break
+        for item in resp:
+            # print(item)
+            # print('-----------')
+            title = item.css('a::text').get()
+            if title.lower() == role:
+                pass
+            else:
+                l = ItemLoader(item=Movies(), selector=item, response=response)
+                l.add_css('title', 'a::text')
+                l.add_css('link', 'a::attr(href)')
+                l.add_css('year',
+                          'span.year_column::text')  # TODO: fix the year formatting (e.g. xa02014/III or 'from ..to..')
+                l.add_css('extra_info', '::text')  # TODO: get fourth element (from getall() list)
+                l.load_item()
+                print('-------')
+                break
 
                 # link = item.css('a::attr(href)').get()
                 # # print(item.css('a::attr(href)').getall())
                 # year = item.css('span.year_column::text').get().split('\n')[
-                #     1]  # TODO: fix the year formatting (e.g. xa02014/III or 'from ..to..')
+                #     1]
                 # # print(item.css('span.year_column::text').getall())
                 # extra_info = item.css('::text').getall()[4]
                 # # print(item.css('::text').getall())
@@ -82,6 +82,5 @@ for item in resp:
     #     genre_resp = response.css('div.see-more.inline.canwrap a::text').getall()
     #     genres = [i.strip() for i in genre_resp if not (i == ' ' or i[:5] == 'See A')]  # TODO: redo with regex
     #     # self.data[movie_title] = self.data[movie_title] + genres
-
 
 # execute(['scrapy', 'crawl', 'imdb'])

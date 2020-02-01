@@ -19,4 +19,8 @@ class Movies(scrapy.Item):
     link = scrapy.Field()
     year = scrapy.Field()
     extra_info = scrapy.Field()
-    genre = scrapy.Field()
+    genres = scrapy.Field()
+    rating = scrapy.Field()
+    rating_count = scrapy.Field()
+    metacritic_rating = scrapy.Field()
+

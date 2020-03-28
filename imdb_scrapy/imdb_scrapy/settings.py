@@ -15,6 +15,11 @@ SPIDER_MODULES = ['imdb_scrapy.spiders']
 NEWSPIDER_MODULE = 'imdb_scrapy.spiders'
 
 
+# output
+FEED_FORMAT = 'json'
+FEED_URI = '%(name)s--%(time)s.json'
+
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'imdb_scrapy (+http://www.yourdomain.com)'
 

@@ -1,7 +1,8 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.cmdline import execute
-from imdb_scrapy.items import Movies
+from imdb_scrapy.items import Movies, MovieLoader
+
 # from imdb_scrapy.imdb_scrapy.items import Movies
 
 
@@ -17,7 +18,7 @@ class Imdb(scrapy.Spider):
 
     def parse(self, response, role='director'):
         """
-        A function to get a movie list (not all episodes!!) in given role.
+        A function to get a movie list (not all episodes!!) in a given role.
         Args:
             response:
             role: director/producer/writer/etc. TODO: fill in missing roles (dropdown)
@@ -26,36 +27,41 @@ class Imdb(scrapy.Spider):
 
         """
 
-        role = 'director'
+        role = 'producer'
+
         resp = response.css(f'div[id*="{role}"]')
         for item in resp:
             title = item.css('a::text').get()
-            if title.lower() == role:
-                pass
-            else:
-                movie_link = item.css('a::attr(href)').get()
-                l = ItemLoader(item=Movies(), selector=item, response=response)
-                l.add_value('title', title)
-                l.add_value('link', movie_link)
-                l.add_css('year',
-                          'span.year_column::text')  # TODO: fix the year formatting (e.g. xa02014/III or 'from ..to..')
-                l.add_css('extra_info', '::text')  # TODO: get fourth element (from getall() list)
+            if title is not None:
+                if title.lower() == role:
+                    pass # first 'a::text' is a role name, hence filtering it out
+                else:
+                    link = item.css('a::attr(href)').get()
 
-                if movie_link is not None:
-                    movie_link = response.urljoin(movie_link)
-                    yield scrapy.Request(movie_link, callback=self.parse_movie_details,
-                                         meta={'item': l.load_item()})
+                    loader = MovieLoader(item=Movies(), selector=item)
+                    loader.add_value('title', title)
+                    loader.add_value('link', link)
+                    loader.add_css('year',
+                                   'span.year_column::text')  # TODO: fix the year formatting (e.g. xa02014/III or 'from ..to..')
+                    loader.add_css('extra_info', '::text')  # TODO: get fourth element (from getall() list)
 
-    def parse_movie_details(self, response):
-        loadernext = ItemLoader(item=response.meta['item'], response=response)
+                    if link is not None:
+                        link = response.urljoin(link)
+                        yield scrapy.Request(link, callback=self.parse_movie_details,
+                                             cb_kwargs={'item': loader.load_item()})
 
-        genre_resp = response.css('div.see-more.inline.canwrap a::text').getall()
-        genres = [i.strip() for i in genre_resp if not (i == ' ' or i[:5] == 'See A')]  # TODO: redo with regex
-        loadernext.add_value('genres', genres)
+    def parse_movie_details(self, response, item):
+        loadernext = MovieLoader(item=item, response=response)
 
+        loadernext.add_css('genres', 'div.see-more.inline.canwrap a::text')
         loadernext.add_css('rating', 'div.ratingValue span::text')
         loadernext.add_css('rating_count', 'div.imdbRating span.small::text')
         loadernext.add_css('metacritic_rating', 'div[class*="metacritic"] span::text')
+        loadernext.add_css('runtime', '#titleDetails > div:nth-child(23) > time::text')
+        loadernext.add_css('budget', '#titleDetails > div:nth-child(12)::text')
+        loadernext.add_css('opening_weekend_USA', '#titleDetails > div:nth-child(13)::text')
+        loadernext.add_css('gross_USA', '#titleDetails > div:nth-child(14)::text')
+        loadernext.add_css('cumulative_world_gross', '#titleDetails > div:nth-child(15)::text')
 
         yield loadernext.load_item()
 

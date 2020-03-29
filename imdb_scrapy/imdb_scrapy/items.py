@@ -38,16 +38,12 @@ def genres_cleanup(genres_item):
 
 
 class MovieLoader(ItemLoader):
-    default_output_processor = Identity()
+    default_output_processor = TakeFirst()
 
     genres_out = MapCompose(genres_cleanup, str.strip)
-    # # year =
-    extra_info = Identity()
-    # rating =
-    # rating_count =
-    # metacritic_rating =
-    # runtime =
-    budget_out = Compose(lambda x: x[1].split('\n')[0], str.strip)
+    year_out = Compose(lambda x: x[0], str.strip)
+    # extra_info_out = Compose(lambda x: x[4]) # cannot access 4th element via Compose lambda x[4]...
+    budget_out = Compose(lambda x: x[1].split('\n')[0], str.strip)  # if no value, either empty string or "\u00bb"
     opening_weekend_USA_out = Compose(lambda x: x[1].split(',\n')[0], str.strip)
-    gross_USA_out = Compose(lambda x: x[1], str.strip)
-    cumulative_world_gross_out = Compose(lambda x: x[1], str.strip)
+    gross_USA_out = Compose(lambda x: x[1], str.strip)  # if no value, empty string
+    cumulative_world_gross_out = Compose(lambda x: x[1], str.strip)  # if no value, empty string
